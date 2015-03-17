@@ -1,0 +1,53 @@
+-------------------------------------
+Assignment 1 Checklist/Grading sheet
+-------------------------------------
+
+Name: Soon Chee Loong
+Student ID: 999295793
+
+-----------------------------------------------------------------------------------------
+A. PLEASE ANSWER THE FOLLOWING QUESTIONS (your assignment will not be graded otherwise!)
+
+  
+1. I verify that I completed this assignment according to the 
+   Student Academic Integrity policy stated at
+   http://www.artsci.utoronto.ca/osai/students/academic-integrity-basics
+
+ 	Yes
+
+
+2. I collaborated on this assignment with another student 
+	No
+   
+
+   If you checked yes, please supply the following
+
+       Student name: None
+       Portion(s) of assignment completed by that student (see checklist below)
+       None
+
+-----------------------------------------------------------------------------------------
+
+B. PLACE AN (X) IN FRONT OF PORTIONS OF THE ASSIGNMENT THAT YOU COMPLETED IN FULL.
+   
+   If a portion of the assignment was not completed fully, please provide 
+   additional information so that we can determine whether or not you are eligible
+   for partial credit. THE MORE INFORMATION YOU SUPPLY (EG. FILE WHICH CONTAINS
+   PARTIAL CODE, FUNCTION NAME, ETC, SUGGESTIONS ON WHERE AND WHAT TO LOOK FOR IN 
+   YOUR PARTIAL IMPLEMENTATION, DETAILED COMMENTS IN YOUR CODE, ETC) THE MORE LIKELY IT IS 
+   WE WILL BE ABLE TO MAKE AN ACCURATE ASSESSMENT
+
+ X  
+___   ( 5 points) Part 2a     Parts description & drawing
+ X                 
+___   (10 points) Part 2b	  Parts transformation description & implementation
+ X
+___   ( 8 points) Part 2c     Animation control functions description & implementation
+ X 
+___   (15 points) Part 2d     Hierarchical object rendering 
+ X                 
+___   ( 2 points) Part 2e     Joint drawing
+ X
+___   (10 points) Part 2f     Written report
+
+-------------------------------------------------------------------------------- 

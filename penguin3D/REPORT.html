@@ -1,0 +1,149 @@
+<!-- vim:set ft=pandoc tw=78 spell: -->
+
+<!-- NOTE: More readable version available in REPORT.pdf and REPORT.html -->
+
+<h1 id="design">Design</h1>
+<p>As with assignment 1, I chose to implement the system based on composable <code>Component</code>s. A <code>Component</code> can be thought of as the basic functional unit of this system with a single <code>Update</code> method. Over that, the following pieces were added.</p>
+<dl>
+<dt><code>Entity</code></dt>
+<dd><p>A <code>Component</code> that has no functionality of its own but can update a number of other components in-order. <code>Entity</code>s are used in many places to execute an ordered list of components.</p>
+<p>The <code>Entity</code> class adds two methods to <code>Component</code>: <code>AddComponent</code> and the <code>&lt;&lt;</code> operator. The <code>&lt;&lt;</code> operator is just a chainable alias for <code>AddComponent</code> that enables more readable code; like so,</p>
+<pre><code>Entity head;
+head
+    &lt;&lt; Component::color(...)
+    &lt;&lt; Component::cuboid(...)
+    ;</code></pre>
+</dd>
+<dt><code>Wrapper</code></dt>
+<dd><p>A <code>Wrapper</code> is the second tool used for composing <code>Component</code>s. A <code>Wrapper</code> is similar to <code>Entity</code> in that it can execute ordered list of <code>Component</code>s but is used when <code>Component</code>s need to be updated before and after a particular component. For example, if some functionality needs to be disabled before updating a component and re-enabled after updating it.</p>
+<p><code>Wrapper</code> adds four methods to <code>Component</code>: <code>AddBefore</code>, its alias <code>&lt;&lt;</code>, <code>AddAfter</code>, and its alias <code>&gt;&gt;</code>. Again, <code>&lt;&lt;</code> and <code>&gt;&gt;</code> facilitate chaining for readability.</p>
+<pre><code>Wrapper wrapper = ...;
+wrapper
+    &lt;&lt; Component::disable(GL_LIGHTING)
+    &gt;&gt; Component::enable(GL_LIGHTING)
+    ;</code></pre>
+<p>The above snippet will disable lighting before updating the wrapped component, update it, and re-enable lighting.</p>
+</dd>
+<dt><code>Supplier</code></dt>
+<dd><p>The final core tool in the system is a <code>Supplier</code>. This is used to inject values into <code>Component</code>s that want to access a mutable value every time they are updated. Instead of each component storing all the values it needs to know to draw, it can ask the corresponding <code>Supplier</code> for the value it needs.</p>
+<p>For example, if a <code>Component</code> needs a <code>float</code> value that specifies some angle, it could accept a <code>Supplier&lt;float&gt;</code> upon construction and query it for the value (using <code>Get()</code>) when it needs it. This makes it easy for the DOF values to be stored in the <code>Keyframe</code> (as in the helper code) while still being accessible to the <code>Component</code>s.</p>
+<p>The <code>Supplier</code> class provides static methods to construct commonly used generic <code>Supplier</code>s:</p>
+<dl>
+<dt><code>constant(c)</code></dt>
+<dd>Returns <code>c</code>.
+</dd>
+<dt><code>pointer(p)</code></dt>
+<dd>Returns <code>*p</code>.
+</dd>
+<dt><code>function(f)</code></dt>
+<dd>Returns <code>f()</code>.
+</dd>
+</dl>
+</dd>
+</dl>
+<p>In addition to the above <code>Component</code>s, the <code>Component</code> class provides several static methods that construct <code>Component</code>s providing commonly used functionalities. Some of them are:</p>
+<dl>
+<dt><code>color(r, g, b, a)</code></dt>
+<dd>Calls <code>glColor4f(r, g, b, a)</code>.
+</dd>
+<dt><code>cuboid(x1, y1, z1, x2, y2, z2) / cuboid(w, h, d)</code></dt>
+<dd>Constructs a cuboid with opposite corners <code>(x1, y1, z1)</code> and <code>(x2, y2, z2)</code>, or around the origin with width, height and depth specified by <code>w</code>, <code>h</code> and <code>d</code>.
+</dd>
+<dt><code>enable(c) / disable(c)</code></dt>
+<dd>Calls <code>glEnable(c) / glDisable(c)</code>
+</dd>
+<dt><code>function(f)</code></dt>
+<dd>Calls <code>f()</code>.
+</dd>
+<dt><code>rotatable(sx, sy, sz) / scalable(sx, sy, sz) / translatable(sx, sy, sz)</code></dt>
+<dd>Rotates/scales/translates the axes by the values supplied by suppliers <code>sx</code>, <code>sy</code> and <code>sz</code>.
+</dd>
+</dl>
+<p><code>Component</code> also provides some helper instance methods for existing components. The most important of them is <code>attach(x, y, z)</code> which wraps the translates to <code>(x, y, z)</code> before updating the component and translates back after updating it. This made attaching robot parts together really simple:</p>
+<pre><code>Entity head;
+[...]
+
+Entity neck;
+neck
+    [...]
+    &lt;&lt; head.attach(0, NECK_HEIGHT, 0);
+
+// ...
+Entity body;
+body
+    [...]
+    &lt;&lt; neck.attach(0, BODY_HEIGHT/2, 0)
+    ;</code></pre>
+<h1 id="degrees-of-freedom">Degrees of Freedom</h1>
+<p>Some of the requirements were unclear so the robot has 27 degrees of freedom.</p>
+<table>
+<caption>The 27 degrees of freedom available to the robot.</caption>
+<thead>
+<tr class="header">
+<th align="left">Functionality</th>
+<th align="left">DOFs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Translate about the 3 axes</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">Rotate about the 3 axes</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">Rotate head about the neck</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">Look up or down</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Tilt head from side-to-side</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">Right shoulder pitch, yaw and roll</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">Left shoulder pitch, yaw and roll</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">Right elbow hinge joint</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Left elbow hinge joint</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">Right forearm scaling</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Left forearm scaling</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">Right thigh socket pitch, yaw and roll</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">Left thigh socket pitch, yaw and roll</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">Left knee hinge joint</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Right knee hinge joint</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>

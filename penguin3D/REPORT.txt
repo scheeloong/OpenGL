@@ -1,0 +1,23 @@
+Design
+
+The starter code was provided by the Professor. 
+
+I chose to implement the system based on composable Classes of Components. Components are the basic unit of each Updated method such as 
+objects, rectangles, Color, Light, Translation, Rotation. Entities are used to ensure matrix operations are preserved. Unlike Assignment 1, 
+I created a new class called Wrapper. Wrapper is used so that it can execute Components in-order, whereby components that come earlier 
+gets outputted before the component itself, and then output the next component. Similar to a BSP tree. 
+It has function such as AddPrevious and AddNext. Finally, there is a class called supplier that is used to pass parameter values to other classes. 
+These parameters often change value. 
+
+Degrees of Freedom
+Some of the requirements were unclear so the robot has 27 degrees of freedom.
+The 2e degrees of freedom available to the robot.
+Functionality
+DOFs
+
+1st-6th DOF for Overall Rotation and Translation of Penguin
+7th DOF for head rotation 
+8th DOF for beak rotation 
+9th-16th DOF for right arm & left arm  rotation and elbow movement
+17th-24th DOF for right leg & left leg  rotation, and knee movement 
+

@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Abhinav Gupta, 998585963" />
+  <meta name="date" content="2013-02-08" />
+  <title>CSC418 Assignment 1 Report</title>
+</head>
+<body>
+<div id="header">
+<h1 class="title">CSC418 Assignment 1 Report</h1>
+<h2 class="author">Soon Chee Loong, 999295793, c4soonch</h2>
+<h3 class="date">10th October 2014</h3>
+</div>
+<!-- vim:set ft=pandoc tw=72 spell: -->
+<!--
+    NOTE: REPORT.html and REPORT.pdf contain much more readable versions
+    of this.
+-->
+
+<p>
+This code was written entirely by my own. However, I did refer to OpenGL online documentation as well as OpenGL code provided online to better understand how to work with OpenGL. A starter code was also provided to me by Prof. Kyros to help handle compilation and initialization of OpenGL for Assignment 1. 
+</p> 
+
+<h1 id="design">Design</h1>
+<p> 
+
+I choose to program using the Object Oriented Programming Methodology as it will results in cleaner, flexible, and adaptable code. The drawback is that it took a lot of time to complete Assignment 1. 
+
+The list of Objects, which I call Component in my code are given below. 
+The commented code in Figure 1 shows the hierarchy in which the Components of each part of the penguin are connected. 
+<pre>
+// ----------- Penguin components defined ---------------------------------------------------------------------------------------------
+// Final Kinematics, from root to leaves 
+// Notation: a->b means  'a' has 'b' in its iterator list 
+// Current Progress: penguin->zoomer-> bodyJoint -> Body -> headJoint     -> Head     -> mouthJoint     -> Mouth
+//			    ->translator	         -> handJoint     -> Hand
+//		     	  	   		         -> leftLegJoint  -> LeftLeg  -> leftFeetJoint  -> leftFeet
+//		     	  	    		         -> rightLegJoint -> RightLeg -> rightFeetJoint -> rightFeet
+// ------------------------------------------------------------------------------------------------------------------------------------
+                          Figure 1: Code shows the connection between the various entities of the penguins. 
+</pre> 
+
+Basically, a single Penguin object is the virtual base class of all Components. It contains an iterator <pre></pre>
+of Components to be able to store all the various objects such as Torso, Leg, Head, Mouth, and Feet in its iterator.
+<pre></pre>
+ This design utilizes polymorphism and calls each different object to execute its own Display() (written as Update() in code) method. 
+<pre></pre>
+Although the transformation between each component's coordinates are handled by OpenGL, 
+<pre></pre>
+I had to compute suitable relative positions between these objects when drawing them. 
+<pre></pre>
+For example, I had to compute postions to allow the top of the Circular Torso to be placed
+<pre></pre>
+slightly below the bottom of the Rectangular Head. Also, I needed to make sure that the objects 
+<pre></pre>
+are connected in proper order such that they are drawn in correctly. Improper ordering of the 
+<pre></pre>
+objects in the connection can result in the Torso output overwriting the output of the Leg. 
+<pre></pre>
+This looks physically incorrect in reality. 
+<pre>
+
+</pre>
+
+Components are added to the existing connection using the AddConnection() method that is available from the virtual base class, Entity. 
+<pre></pre>
+Transformation is done neatly by including a Joint object between different Components. 
+<pre></pre>
+As the output of a Penguin-liked Object is a specific one, the Joint Object is used 
+<pre></pre>
+to handle all specific computations of transformation between different Component's coordinate frame 
+<pre></pre>
+such that the final output appears like a Penguin. This allows each component to execute its methods 
+<pre></pre>
+within its own coordinate frame without realizing that it is part of a larger Entity, which is the Penguin. 
+<pre>
+
+</pre>
+
+<p>Available Objects are:</p>
+<dl>
+<dt><strong><code>Rectangle</code></strong></dt>
+<dd>Draws fixed size rectangles.
+</dd>
+<dt><strong><code>Circle</code></strong></dt>
+<dd>Draws fixed size circles.
+</dd>
+<dt><strong><code>Color</code></strong></dt>
+<dd>Changes the current color.
+</dd>
+<dt><strong><code>Zoomer</code></strong></dt>
+<dd>Uniform scale of the model view matrix.
+</dd>
+<dt><strong><code>Translator</code></strong></dt>
+<dd>Translate the model view matrix.
+</dd>
+</dl>
+<p>An advantage of this design is that it is very easy to specify the structure and hierarchy of the operations. For example, the following code:</p>
+<pre><code>
+Entity Hand;
+Hand.AddComponent(new Color(0.5, 0.5, 0.5));
+Hand.AddComponent(new Rectangle(0.5, 0.5, 0.5));
+Entity Body;
+Body.AddComponent(new Joint(x, y, angle, arm));
+Body.Update();
+</code></pre>
+
+This results in a Hand Component including a Color, Rectangle, and Joint in its iterator. When the Component that points to Hand calls Hand to Update(), 
+Hand iteratively calls the Components that it points to Update() as well. 
+<p>The penguin has the following parts:</p>
+<dl>
+<dt><strong>Body/Torso</strong></dt>
+<dd><p>The main entity that every other Component is attached to. This has two degrees of freedom for translation.</p>
+</dd>
+<dt><strong>Head</strong></dt>
+<dd><p>The Head has the eyes and the upper mouth which moves with the head. The Head has one degree of freedom to rotate about the Body it is connected to.
+</dd>
+<dt><strong>Mouth</strong></dt>
+<dd><p>The Mouth is connected to the Head with a joint, allowing the Mouth to be translated vertically. This simulates the Penguin opening and closing its mouth. </p>
+</dd>
+<dt><strong>Left and Right Legs</strong></dt>
+<dd><p>The Legs are connected to the Body with joints. The joints provide a degree of freedom each to rotate each Leg. </p>
+</dd>
+
+<dt><strong>Left and Right Feet</strong></dt>
+<dd><p>The Feets are attached to their respective Legs with joints, each providing a degree of freedom for rotation of the Feet.</p>
+</dd>
+</dl>
+<h1 id="transformations">Transformations</h1>
+<dl>
+<dt><strong>Translations</strong></dt>
+<dd>All translations are done by <code>Joints and Translator</code>.
+</dd>
+<dt><strong>Rotations</strong></dt>
+<dd>All rotations are also done by <code>Joints</code>.
+</dd>
+<dt><strong>Scales</strong></dt>
+<dd>Only Uniform Scale is needed for the Penguin, as it does not physically look realistic for the Penguin to shear in any direction. It is called <code>Zoomer</code> in code. 
+</dd>
+</dl>
+<h1 id="shapes">Shapes</h1>
+<dl>
+<dt><strong>Rectangles</strong></dt>
+<dd>Rectangles are drawn by using the Polygon with for vertices. 
+</dd>
+<dt><strong>Circles</strong></dt>
+<dd>Circles are drawn by using the parametric equation of circles. Each circle has a <code>smoothness</code> that specifies the number of points used to draw the circle. The points smoothness increase with the size of the circle. 
+</dd>
+</dl>
+
+<h1 id="Result">Results</h1>
+<dl>
+<dd>
+<p>
+I successfully completed the entire Assignment. The Penguin is hardcoded to oscillate all its joins simultaneously like a pendulum. Small circles are drawn to depict the locations of the rotary joints. Finally, the output Penguin does look like a cute Penguin. There are the required 9 degrees of freedom to control using the spinners. 
+</p>
+</dd>
+</dl>
+
+</body>
+</html>
